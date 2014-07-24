@@ -14,6 +14,12 @@ RECIPIENT_TYPE = (
     ('bcc', 'BCC'),
 )
 
+class TruncatingCharField(models.CharField):
+    def get_prep_value(self, value):
+        value = super(TruncatingCharField,self).get_prep_value(value)
+        if value:
+            return value[:self.max_length]
+        return value
 
 class Queue(models.Model):
     queue = models.CharField(max_length=50)
@@ -31,7 +37,8 @@ class Email(models.Model):
 
     # Subjects can be be longer if they're split byt CRLF, but this is a good
     # default
-    subject = models.CharField(max_length=78)
+    # subject = models.CharField(max_length=256)
+    subject = TruncatingCharField(max_length=78)
     body = models.TextField()
     queue = models.ForeignKey(Queue)
     created = models.DateTimeField(auto_now_add=True)
